@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menú Interactivo - Santa Soya</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              green: '#2E7D32',
+              greenDark: '#1B5E20',
+              greenLight: '#E8F5E9',
+              gold: '#F59E0B',
+              brown: '#5D4037',
+              cream: '#FAFAFA'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #F4F6F8;
+    }
+    /* Smooth Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F1F1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    /* Pulsing & Glow Effects */
+    .glow-badge {
+      box-shadow: 0 4px 14px 0 rgba(46, 125, 50, 0.39);
+    }
+    .active-tab {
+      background-color: #2E7D32 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    }
+  </style>
+</head>
+<body class="font-sans text-gray-800 min-h-screen flex flex-col justify-between select-none">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white shadow-md sticky top-0 z-30 px-4 py-3 md:px-8 md:py-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+        <div class="flex items-center gap-3.5">
+          <!-- Official Santa Soya SVG Logo Badge -->
+          <div class="relative w-14 h-14 md:w-16 md:h-16 flex-shrink-0">
+            <svg viewBox="0 0 500 500" class="w-full h-full drop-shadow-md">
+              <!-- Yellow Circle Background -->
+              <circle cx="250" cy="250" r="240" fill="#E8B024"/>
+              
+              <!-- White Text: Santa -->
+              <text x="250" y="215" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF" letter-spacing="-2">Santa</text>
+              
+              <!-- White Text: Soya with Green Leaf for 'o' -->
+              <text x="145" y="340" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF" letter-spacing="-2">s</text>
+              
+              <!-- Green Leaf SVG Element replacing 'o' -->
+              <g transform="translate(195, 255) scale(1.15)">
+                <path d="M45,10 C20,10 5,30 5,55 C5,80 25,95 50,95 C75,95 95,75 95,50 C95,25 70,10 45,10 Z" fill="none" stroke="#1E8E3E" stroke-width="14" stroke-linecap="round"/>
+                <path d="M25,75 C35,60 55,40 70,30" fill="none" stroke="#1E8E3E" stroke-width="12" stroke-linecap="round"/>
+              </g>
+
+              <text x="292" y="340" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF" letter-spacing="-2">ya</text>
+            </svg>
+          </div>
+
+          <div>
+            <h1 class="text-2xl md:text-3xl font-black tracking-tight text-brand-greenDark flex items-center gap-2">
+              Santa Soya
+            </h1>
+            <p class="text-xs md:text-sm font-bold text-amber-600 tracking-wide">El sabor de la felicidad</p>
+          </div>
+        </div>
+
+        <!-- Touch Quick Search Trigger Mobile/Tablet -->
+        <div class="sm:hidden">
+          <button onclick="focusSearch()" class="p-3 bg-gray-100 rounded-full text-gray-600 active:bg-gray-200">
+            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Search Bar -->
+      <div class="relative w-full sm:w-80">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          oninput="handleSearch()"
+          placeholder="Buscar sabor o bebida..." 
+          class="w-full pl-11 pr-10 py-3 bg-gray-100 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all shadow-inner"
+        >
+        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+          <i class="fa-solid fa-circle-xmark text-lg"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- CATEGORY TABS (LARGE TOUCH TARGETS) -->
+    <nav class="max-w-7xl mx-auto mt-4 overflow-x-auto no-scrollbar pb-1">
+      <div class="flex gap-2 md:gap-3 min-w-max">
+        <button onclick="filterCategory('all', this)" class="category-btn active-tab px-6 py-3 rounded-2xl font-bold text-sm md:text-base transition-all bg-gray-100 text-gray-700 flex items-center gap-2">
+          <i class="fa-solid fa-border-all"></i>
+          <span>Todos</span>
+        </button>
+        <button onclick="filterCategory('paletas', this)" class="category-btn px-6 py-3 rounded-2xl font-bold text-sm md:text-base transition-all bg-gray-100 text-gray-700 flex items-center gap-2">
+          <i class="fa-solid fa-ice-cream text-pink-500"></i>
+          <span>Helados y Paletas (15 Bs)</span>
+        </button>
+        <button onclick="filterCategory('soya', this)" class="category-btn px-6 py-3 rounded-2xl font-bold text-sm md:text-base transition-all bg-gray-100 text-gray-700 flex items-center gap-2">
+          <i class="fa-solid fa-bottle-droplet text-emerald-600"></i>
+          <span>Bebidas de Soya</span>
+        </button>
+        <button onclick="filterCategory('cafeteria', this)" class="category-btn px-6 py-3 rounded-2xl font-bold text-sm md:text-base transition-all bg-gray-100 text-gray-700 flex items-center gap-2">
+          <i class="fa-solid fa-mug-hot text-amber-700"></i>
+          <span>Cafetería</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-6 md:px-8 flex-grow w-full">
+
+    <!-- PALETAS HELADOS SPECIAL SECTION (EXPANDABLE GRID) -->
+    <section id="paletasSection" class="mb-10 catalog-section">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-xl">
+            🍦
+          </div>
+          <div>
+            <h2 class="text-xl md:text-2xl font-black text-gray-800">Helados y Paletas "La Paletta"</h2>
+            <p class="text-xs md:text-sm text-pink-600 font-semibold">¡Cualquier paleta por sólo <span class="bg-pink-100 px-2 py-0.5 rounded-md font-bold">15 Bs</span>!</p>
+          </div>
+        </div>
+        <span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-full border border-amber-200 shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info"></i> Pregunta por disponibilidad
+        </span>
+      </div>
+
+      <!-- PALETAS TABS (CREMA / AGUA) -->
+      <div class="bg-white rounded-3xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6">
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-4">
+          <button onclick="togglePaletaSub('crema', this)" class="subtab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-pink-500 text-white shadow-md transition-all flex items-center gap-2">
+            <i class="fa-solid fa-stroopwafel"></i> Paletas de Crema (25 Sabores)
+          </button>
+          <button onclick="togglePaletaSub('agua', this)" class="subtab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-droplet text-blue-500"></i> Paletas de Agua (5 Sabores)
+          </button>
+        </div>
+
+        <!-- PALETAS DE CREMA GRID -->
+        <div id="paletasCremaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+          <!-- Dynamically Rendered -->
+        </div>
+
+        <!-- PALETAS DE AGUA GRID -->
+        <div id="paletasAguaGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 hidden">
+          <!-- Dynamically Rendered -->
+        </div>
+      </div>
+    </section>
+
+    <!-- BEBIDAS DE SOYA SECTION -->
+    <section id="soyaSection" class="mb-10 catalog-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xl">
+          🥛
+        </div>
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-gray-800">Alimento Bebible de Soya - IDEAL</h2>
+          <p class="text-xs md:text-sm text-emerald-600 font-medium">Nutritivo, fresco y delicioso para compartir</p>
+        </div>
+      </div>
+
+      <!-- Soya Products Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        
+        <!-- Soya 900 ml -->
+        <div class="product-card bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden" data-name="soya 900ml chocolate frutilla banana tradicional 7bs">
+          <div class="absolute top-4 right-4 bg-emerald-600 text-white font-black text-lg px-3 py-1 rounded-2xl shadow-sm glow-badge">
+            7 Bs
+          </div>
+          <div>
+            <div class="w-full h-44 bg-gradient-to-b from-emerald-50 to-emerald-100/50 rounded-2xl flex items-center justify-center p-3 mb-4 relative">
+              <span class="text-6xl">🧃</span>
+              <span class="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-lg border border-emerald-200">
+                Pouch 900 mL
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">Santa Soya IDEAL 900 ml</h3>
+            <p class="text-xs text-gray-500 mb-4">Presentación familiar en pouch sellado.</p>
+            
+            <div class="mb-4">
+              <span class="text-xs font-bold text-gray-600 block mb-2">Sabores Disponibles:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="text-xs bg-amber-100 text-amber-900 font-semibold px-2.5 py-1 rounded-lg">🍫 Chocolate</span>
+                <span class="text-xs bg-pink-100 text-pink-800 font-semibold px-2.5 py-1 rounded-lg">🍓 Frutilla</span>
+                <span class="text-xs bg-yellow-100 text-yellow-800 font-semibold px-2.5 py-1 rounded-lg">🍌 Banana</span>
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-1 rounded-lg">🥛 Tradicional</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="openModal('Santa Soya 900 ml', '7 Bs', 'Presentación grande de 900ml ideal para la familia.', ['Chocolate', 'Frutilla', 'Banana', 'Tradicional'], '🧃')" class="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors active:scale-95 text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-eye"></i> Ver Detalles
+          </button>
+        </div>
+
+        <!-- Soya 300 ml -->
+        <div class="product-card bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden" data-name="soya 300ml chocolate frutilla banana tradicional 4bs">
+          <div class="absolute top-4 right-4 bg-emerald-600 text-white font-black text-lg px-3 py-1 rounded-2xl shadow-sm glow-badge">
+            4 Bs
+          </div>
+          <div>
+            <div class="w-full h-44 bg-gradient-to-b from-emerald-50 to-emerald-100/50 rounded-2xl flex items-center justify-center p-3 mb-4 relative">
+              <span class="text-5xl">🧃</span>
+              <span class="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-lg border border-emerald-200">
+                Pouch 300 mL
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">Santa Soya IDEAL 300 ml</h3>
+            <p class="text-xs text-gray-500 mb-4">Presentación individual personal.</p>
+
+            <div class="mb-4">
+              <span class="text-xs font-bold text-gray-600 block mb-2">Sabores Disponibles:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="text-xs bg-amber-100 text-amber-900 font-semibold px-2.5 py-1 rounded-lg">🍫 Chocolate</span>
+                <span class="text-xs bg-pink-100 text-pink-800 font-semibold px-2.5 py-1 rounded-lg">🍓 Frutilla</span>
+                <span class="text-xs bg-yellow-100 text-yellow-800 font-semibold px-2.5 py-1 rounded-lg">🍌 Banana</span>
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-1 rounded-lg">🥛 Tradicional</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="openModal('Santa Soya 300 ml', '4 Bs', 'Presentación individual de 300ml lista para llevar.', ['Chocolate', 'Frutilla', 'Banana', 'Tradicional'], '🧃')" class="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors active:scale-95 text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-eye"></i> Ver Detalles
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CAFETERIA SECTION -->
+    <section id="cafeteriaSection" class="mb-10 catalog-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
+          ☕
+        </div>
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-gray-800">Cafetería Caliente</h2>
+          <p class="text-xs md:text-sm text-amber-700 font-medium">Bebidas preparadas al instante en vaso térmico blanco</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+        <!-- Café Americano -->
+        <div class="product-card bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col sm:flex-row gap-5 items-center justify-between relative overflow-hidden" data-name="cafe americano caliente vaso blanco 10bs">
+          <div class="w-full sm:w-36 h-36 bg-gradient-to-b from-amber-50 to-orange-100/50 rounded-2xl flex items-center justify-center text-5xl flex-shrink-0 relative">
+            ☕
+            <span class="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-200">
+              Vaso Térmico
+            </span>
+          </div>
+          <div class="flex-grow text-center sm:text-left">
+            <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+              <h3 class="text-xl font-bold text-gray-800">Café Americano</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Café caliente aromático recién preparado, servido en cómodo vaso térmico térmico blanco.</p>
+            <div class="text-2xl font-black text-amber-700 mb-3">10 Bs</div>
+            <button onclick="openModal('Café Americano', '10 Bs', 'Café recién pasado servido bien caliente en vaso térmico blanco isotérmico.', [], '☕')" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all text-sm active:scale-95 shadow-md">
+              Ordenar / Ver Más
+            </button>
+          </div>
+        </div>
+
+        <!-- Latte / Capuchino -->
+        <div class="product-card bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col sm:flex-row gap-5 items-center justify-between relative overflow-hidden" data-name="late cappuccino capuchino cafe espresso vaso blanco 15bs">
+          <div class="w-full sm:w-36 h-36 bg-gradient-to-b from-amber-50 to-orange-100/50 rounded-2xl flex items-center justify-center text-5xl flex-shrink-0 relative">
+            🥤
+            <span class="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-200">
+              Vaso Térmico
+            </span>
+          </div>
+          <div class="flex-grow text-center sm:text-left">
+            <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+              <h3 class="text-xl font-bold text-gray-800">Café Latte / Capuchino</h3>
+              <span class="bg-amber-100 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">Espumoso</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Combinación suave de espresso intenso con leche cremosita en vaso térmico especial.</p>
+            <div class="text-2xl font-black text-amber-700 mb-3">15 Bs</div>
+            <button onclick="openModal('Café Latte / Capuchino', '15 Bs', 'Deliciosa preparación con espuma abundante en vaso térmico blanco.', ['Opciones: Latte Clásico', 'Capuchino Espumoso'], '🥤')" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all text-sm active:scale-95 shadow-md">
+              Ordenar / Ver Más
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- NO RESULTS ALERT (FOR SEARCH) -->
+    <div id="noResults" class="hidden text-center py-12 bg-white rounded-3xl shadow-sm border border-gray-100">
+      <div class="text-5xl mb-3">🔍</div>
+      <h3 class="text-lg font-bold text-gray-700">No encontramos coincidencias</h3>
+      <p class="text-sm text-gray-500 mb-4">Intenta buscando palabras como "Chocolate", "Frutilla", "Café" o "Paleta".</p>
+      <button onclick="clearSearch()" class="px-5 py-2 bg-brand-green text-white font-bold rounded-xl text-sm">
+        Ver todos los productos
+      </button>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-gray-200 py-4 px-6 mt-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+      <div class="flex items-center gap-3">
+        <!-- Mini Logo -->
+        <div class="w-8 h-8 relative">
+          <svg viewBox="0 0 500 500" class="w-full h-full">
+            <circle cx="250" cy="250" r="240" fill="#E8B024"/>
+            <text x="250" y="215" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF">Santa</text>
+            <text x="145" y="340" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF">s</text>
+            <g transform="translate(195, 255) scale(1.15)">
+              <path d="M45,10 C20,10 5,30 5,55 C5,80 25,95 50,95 C75,95 95,75 95,50 C95,25 70,10 45,10 Z" fill="none" stroke="#1E8E3E" stroke-width="14"/>
+            </g>
+            <text x="292" y="340" font-family="'Inter', sans-serif" font-weight="900" font-size="112" fill="#FFFFFF">ya</text>
+          </svg>
+        </div>
+        <span class="font-bold text-gray-800 text-sm">Santa Soya</span>
+        <span class="text-gray-300">|</span>
+        <span class="text-xs text-amber-700 font-semibold">El sabor de la felicidad</span>
+      </div>
+      <p class="text-xs text-gray-400">
+        Menú Interactivo para Tablets &bull; Santa Soya
+      </p>
+    </div>
+  </footer>
+
+  <!-- DETAIL MODAL -->
+  <div id="productModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl transform scale-95 transition-transform duration-200" id="modalContainer">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div id="modalIcon" class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl">
+              🍦
+            </div>
+            <div>
+              <h3 id="modalTitle" class="text-xl font-black text-gray-800">Título Producto</h3>
+              <span id="modalPrice" class="inline-block bg-emerald-100 text-emerald-800 font-bold text-sm px-3 py-0.5 rounded-full mt-1">
+                0 Bs
+              </span>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg transition-colors">
+            ✕
+          </button>
+        </div>
+
+        <p id="modalDescription" class="text-sm text-gray-600 mb-6">
+          Descripción detallada del producto.
+        </p>
+
+        <!-- Options / Flavors list in Modal -->
+        <div id="modalOptionsContainer" class="mb-6 hidden">
+          <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sabores / Variedades disponibles:</h4>
+          <div id="modalOptionsList" class="flex flex-wrap gap-2">
+            <!-- Badges -->
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-2xl p-4 flex items-center justify-between text-xs text-gray-500 mb-6">
+          <span class="flex items-center gap-1.5 font-medium">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i> Disponible en Tienda
+          </span>
+          <span class="flex items-center gap-1.5 font-medium">
+            <i class="fa-solid fa-truck-sparkles text-amber-600"></i> Calidad Garantizada
+          </span>
+        </div>
+
+        <button onclick="closeModal()" class="w-full py-3.5 bg-brand-green hover:bg-brand-greenDark text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95 text-center">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT INTERACTION LOGIC -->
+  <script>
+    // DATA STRUCTURE FOR PALETAS
+    const paletasCrema = [
+      { name: "Mora", icon: "🫐", color: "bg-purple-50 text-purple-700" },
+      { name: "Bombón", icon: "🍫", color: "bg-amber-50 text-amber-800" },
+      { name: "Ositos", icon: "🍬", color: "bg-blue-50 text-blue-700" },
+      { name: "Pistacho", icon: "🌰", color: "bg-emerald-50 text-emerald-800" },
+      { name: "Uva", icon: "🍇", color: "bg-purple-50 text-purple-800" },
+      { name: "Nuez", icon: "🥜", color: "bg-amber-50 text-amber-900" },
+      { name: "Copoazú", icon: "🥭", color: "bg-yellow-50 text-yellow-800" },
+      { name: "Granizado", icon: "🍨", color: "bg-gray-100 text-gray-800" },
+      { name: "Coco", icon: "🥥", color: "bg-stone-100 text-stone-800" },
+      { name: "Amarena", icon: "🍒", color: "bg-red-50 text-red-800" },
+      { name: "Oreo", icon: "🍪", color: "bg-zinc-100 text-zinc-800" },
+      { name: "Mentachips", icon: "🌿", color: "bg-teal-50 text-teal-800" },
+      { name: "Chocolate", icon: "🍫", color: "bg-amber-100 text-amber-950" },
+      { name: "Frambuesa", icon: "🍓", color: "bg-rose-50 text-rose-700" },
+      { name: "Pasas al Ron", icon: "🍇", color: "bg-amber-50 text-amber-800" },
+      { name: "Unicornio", icon: "🦄", color: "bg-pink-50 text-pink-700" },
+      { name: "Pie de Limón", icon: "🍋", color: "bg-lime-50 text-lime-800" },
+      { name: "Chicle", icon: "🫧", color: "bg-sky-50 text-sky-700" },
+      { name: "Vainilla", icon: "🍦", color: "bg-amber-50 text-amber-700" },
+      { name: "Cocado", icon: "🥥", color: "bg-orange-50 text-orange-800" },
+      { name: "Dulce de Leche", icon: "🍯", color: "bg-amber-100 text-amber-900" },
+      { name: "Café", icon: "☕", color: "bg-stone-100 text-stone-900" },
+      { name: "Queso", icon: "🧀", color: "bg-yellow-50 text-yellow-700" },
+      { name: "Nido", icon: "🥛", color: "bg-blue-50 text-blue-800" },
+      { name: "Chocolate Amargo", icon: "🍫", color: "bg-stone-200 text-stone-900" }
+    ];
+
+    const paletasAgua = [
+      { name: "Frutilla", icon: "🍓", color: "bg-pink-50 text-pink-700" },
+      { name: "Mango", icon: "🥭", color: "bg-orange-50 text-orange-700" },
+      { name: "Sandía", icon: "🍉", color: "bg-red-50 text-red-700" },
+      { name: "Limón", icon: "🍋", color: "bg-lime-50 text-lime-700" },
+      { name: "Maracuyá", icon: "🟡", color: "bg-yellow-50 text-yellow-700" }
+    ];
+
+    // RENDER PALETAS GRIDS
+    function renderPaletas() {
+      const cremaContainer = document.getElementById('paletasCremaGrid');
+      const aguaContainer = document.getElementById('paletasAguaGrid');
+
+      cremaContainer.innerHTML = paletasCrema.map(p => `
+        <div onclick="openModal('Paleta de Crema: ${p.name}', '15 Bs', 'Deliciosa paleta helada de crema artesanal sabor a ${p.name}.', [], '${p.icon}')" 
+             class="paleta-card p-3 rounded-2xl ${p.color} border border-black/5 hover:shadow-md transition-all cursor-pointer flex flex-col items-center justify-center text-center group active:scale-95"
+             data-name="paleta crema ${p.name.toLowerCase()} 15bs">
+          <span class="text-3xl mb-1 group-hover:scale-110 transition-transform">${p.icon}</span>
+          <span class="text-xs font-bold line-clamp-1">${p.name}</span>
+          <span class="text-[10px] font-extrabold opacity-75 mt-0.5">15 Bs</span>
+        </div>
+      `).join('');
+
+      aguaContainer.innerHTML = paletasAgua.map(p => `
+        <div onclick="openModal('Paleta de Agua: ${p.name}', '15 Bs', 'Refrescante paleta de agua elaborada con fruta natural de ${p.name}.', [], '${p.icon}')" 
+             class="paleta-card p-3 rounded-2xl ${p.color} border border-black/5 hover:shadow-md transition-all cursor-pointer flex flex-col items-center justify-center text-center group active:scale-95"
+             data-name="paleta agua ${p.name.toLowerCase()} 15bs">
+          <span class="text-3xl mb-1 group-hover:scale-110 transition-transform">${p.icon}</span>
+          <span class="text-xs font-bold line-clamp-1">${p.name}</span>
+          <span class="text-[10px] font-extrabold opacity-75 mt-0.5">15 Bs</span>
+        </div>
+      `).join('');
+    }
+
+    // TOGGLE PALETAS SUBTAB (CREMA / AGUA)
+    function togglePaletaSub(type, btn) {
+      const cremaGrid = document.getElementById('paletasCremaGrid');
+      const aguaGrid = document.getElementById('paletasAguaGrid');
+      const buttons = document.querySelectorAll('.subtab-btn');
+
+      buttons.forEach(b => {
+        b.classList.remove('bg-pink-500', 'text-white', 'shadow-md');
+        b.classList.add('bg-gray-100', 'text-gray-600');
+      });
+
+      btn.classList.remove('bg-gray-100', 'text-gray-600');
+      btn.classList.add('bg-pink-500', 'text-white', 'shadow-md');
+
+      if (type === 'crema') {
+        cremaGrid.classList.remove('hidden');
+        aguaGrid.classList.add('hidden');
+      } else {
+        cremaGrid.classList.add('hidden');
+        aguaGrid.classList.remove('hidden');
+      }
+    }
+
+    // CATEGORY FILTERING
+    function filterCategory(category, btn) {
+      const allBtns = document.querySelectorAll('.category-btn');
+      allBtns.forEach(b => b.classList.remove('active-tab'));
+      btn.classList.add('active-tab');
+
+      const paletasSec = document.getElementById('paletasSection');
+      const soyaSec = document.getElementById('soyaSection');
+      const cafeSec = document.getElementById('cafeteriaSection');
+
+      if (category === 'all') {
+        paletasSec.classList.remove('hidden');
+        soyaSec.classList.remove('hidden');
+        cafeSec.classList.remove('hidden');
+      } else if (category === 'paletas') {
+        paletasSec.classList.remove('hidden');
+        soyaSec.classList.add('hidden');
+        cafeSec.classList.add('hidden');
+      } else if (category === 'soya') {
+        paletasSec.classList.add('hidden');
+        soyaSec.classList.remove('hidden');
+        cafeSec.classList.add('hidden');
+      } else if (category === 'cafeteria') {
+        paletasSec.classList.add('hidden');
+        soyaSec.classList.add('hidden');
+        cafeSec.classList.remove('hidden');
+      }
+    }
+
+    // LIVE SEARCH FUNCTION
+    function handleSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      const noResults = document.getElementById('noResults');
+
+      if (query.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      let visibleCount = 0;
+
+      // Filter product cards
+      const productCards = document.querySelectorAll('.product-card');
+      productCards.forEach(card => {
+        const text = card.getAttribute('data-name');
+        if (text.includes(query)) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      // Filter paleta cards
+      const paletaCards = document.querySelectorAll('.paleta-card');
+      let visiblePaletas = 0;
+      paletaCards.forEach(card => {
+        const text = card.getAttribute('data-name');
+        if (text.includes(query)) {
+          card.classList.remove('hidden');
+          visiblePaletas++;
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      // Hide or show empty sections during search
+      const sections = document.querySelectorAll('.catalog-section');
+      sections.forEach(sec => {
+        const hasVisibleChild = sec.querySelector('.product-card:not(.hidden), .paleta-card:not(.hidden)');
+        if (hasVisibleChild) {
+          sec.classList.remove('hidden');
+        } else {
+          sec.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+      }
+    }
+
+    function clearSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.value = '';
+      handleSearch();
+      
+      // Reset filter button to 'Todos'
+      const firstTab = document.querySelectorAll('.category-btn')[0];
+      filterCategory('all', firstTab);
+    }
+
+    function focusSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.focus();
+    }
+
+    // MODAL DIALOG CONTROLS
+    function openModal(title, price, description, options = [], icon = '🍦') {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalPrice').innerText = price;
+      document.getElementById('modalDescription').innerText = description;
+      document.getElementById('modalIcon').innerText = icon;
+
+      const optionsContainer = document.getElementById('modalOptionsContainer');
+      const optionsList = document.getElementById('modalOptionsList');
+
+      if (options.length > 0) {
+        optionsList.innerHTML = options.map(opt => `
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
+            ✨ ${opt}
+          </span>
+        `).join('');
+        optionsContainer.classList.remove('hidden');
+      } else {
+        optionsContainer.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('productModal');
+      const container = document.getElementById('modalContainer');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        container.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('productModal');
+      const container = document.getElementById('modalContainer');
+      modal.classList.add('opacity-0');
+      container.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    // INITIALIZATION
+    window.onload = function() {
+      renderPaletas();
+    };
+  </script>
+</body>
+</html>
